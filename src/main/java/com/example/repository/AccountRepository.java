@@ -7,4 +7,6 @@ public interface AccountRepository extends JpaRepository<Account, Integer>{
 
     Account findAccountByUsername(String username);
 
+    Account findAccountByAccountId(int id);
+
 }

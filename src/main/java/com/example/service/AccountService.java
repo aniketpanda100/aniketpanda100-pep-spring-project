@@ -18,8 +18,11 @@ public class AccountService {
         return accountRepository.findAccountByUsername(username);
     }
 
+    public Account getAccountById(int id) {
+        return accountRepository.findAccountByAccountId(id);
+    }
+
     public Account createAccount(Account account) {
-        accountRepository.save(account);
-        return accountRepository.findAccountByUsername(account.getUsername());
+        return accountRepository.save(account);
     }
 }

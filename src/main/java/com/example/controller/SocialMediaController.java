@@ -4,13 +4,14 @@ import com.example.entity.*;
 import com.example.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import java.util.List;
 
 /**
@@ -43,6 +44,12 @@ public class SocialMediaController {
         return ResponseEntity.status(200).body(messages);
     }
 
+    @GetMapping("/accounts/{accountId}/messages")
+    public ResponseEntity getMessagesByAccount(@PathVariable int accountId){
+        List<Message> messages = messageService.getMessagesByAccount(accountId);
+        return ResponseEntity.status(200).body(messages);
+    }
+
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody Account account){
         Account retrievedAccount = accountService.getAccountByUsername(account.getUsername());
@@ -65,6 +72,38 @@ public class SocialMediaController {
         }
         Account retrievedAccount = accountService.createAccount(account);
         return ResponseEntity.status(200).body(retrievedAccount);
+    }
+
+    @PostMapping("/messages")
+    public ResponseEntity createMessage(@RequestBody Message message){
+        if (message.getMessageText().length() < 1 || message.getMessageText().length() > 255) {
+            return ResponseEntity.status(400).build();
+        }
+        Account account = accountService.getAccountById(message.getPostedBy());
+        if (account == null) return ResponseEntity.status(400).build();
+        Message retrievedMessage = messageService.createMessage(message);
+        return ResponseEntity.status(200).body(retrievedMessage);
+    }
+
+    @PatchMapping("/messages/{messageId}")
+    public ResponseEntity updateMessageById(@PathVariable int messageId, @RequestBody String messageText){
+        messageText = messageText.substring(18,messageText.length()-1);
+        if (messageText.length() < 1 || messageText.length() > 255) {
+            return ResponseEntity.status(400).build();
+        }
+        Message message = messageService.getMessageById(messageId);
+        if (message == null) return ResponseEntity.status(400).build();
+        message.setMessageText(messageText);
+        messageService.updateMessage(message);
+        return ResponseEntity.ok().body(1);
+    }
+
+    @DeleteMapping("/messages/{messageId}")
+    public ResponseEntity deleteMessageById(@PathVariable int messageId){
+        Message message = messageService.getMessageById(messageId);
+        if (message == null) return ResponseEntity.ok().build();
+        messageService.deleteMessageById(messageId);
+        return ResponseEntity.ok().body(1);
     }
 
 }
