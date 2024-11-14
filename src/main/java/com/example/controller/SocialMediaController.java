@@ -15,22 +15,32 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 /**
- * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
- * found in readme.md as well as the test cases. You be required to use the @GET/POST/PUT/DELETE/etc Mapping annotations
- * where applicable as well as the @ResponseBody and @PathVariable annotations. You should
- * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
+ * Contains endpoints and handlers for the controller using Spring. The endpoint descriptions can be
+ * found in readme.md as well as the test cases. The @GET/POST/PUT/DELETE/etc Mapping annotations
+ * are used where applicable as well as the @ResponseBody and @PathVariable annotations.
  */
 @RestController
 public class SocialMediaController {
+    /*
+     * Service instance variables for messages and accounts
+     */
     MessageService messageService;
     AccountService accountService;
 
+    /*
+     * Constructor to instantiate service variables
+     */
     @Autowired
     public SocialMediaController(MessageService messageService, AccountService accountService){
         this.messageService = messageService;
         this.accountService = accountService;
     }
 
+    /*
+     * Gets messages by their id
+     * @param messageId int id of the message
+     * @return ResponseEntity with message in its body if found
+     */
     @GetMapping("/messages/{messageId}")
     public ResponseEntity getMessageById(@PathVariable int messageId){
         Message message = messageService.getMessageById(messageId);
@@ -38,18 +48,32 @@ public class SocialMediaController {
         return ResponseEntity.status(200).body(message);
     }
 
+    /*
+     * Gets all messages
+     * @return ResponseEntity with list of messages in body
+     */
     @GetMapping("/messages")
     public ResponseEntity getAllMessages(){
         List<Message> messages = messageService.getAllMessages();
         return ResponseEntity.status(200).body(messages);
     }
 
+    /*
+     * Gets all message by a user
+     * @param accountId int id of user
+     * @return ResponseEntity with list of messages in body
+     */
     @GetMapping("/accounts/{accountId}/messages")
     public ResponseEntity getMessagesByAccount(@PathVariable int accountId){
         List<Message> messages = messageService.getMessagesByAccount(accountId);
         return ResponseEntity.status(200).body(messages);
     }
 
+    /*
+     * Authenticates user login attempt
+     * @param account an Account with username/password but no id
+     * @return ResponseEntity holding account with id if found/authenticated
+     */
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody Account account){
         Account retrievedAccount = accountService.getAccountByUsername(account.getUsername());
@@ -63,6 +87,11 @@ public class SocialMediaController {
         return ResponseEntity.status(200).body(retrievedAccount);
     }
 
+    /*
+     * Register a user
+     * @param account an Account to post
+     * @return ResponseEntity with posted account if successful
+     */
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody Account account){
         Account duplicateAccount = accountService.getAccountByUsername(account.getUsername());
@@ -74,6 +103,11 @@ public class SocialMediaController {
         return ResponseEntity.status(200).body(retrievedAccount);
     }
 
+    /*
+     * Posts new message
+     * @param message Message to post
+     * @return ResponseEntity with persisted message if successful
+     */
     @PostMapping("/messages")
     public ResponseEntity createMessage(@RequestBody Message message){
         if (message.getMessageText().length() < 1 || message.getMessageText().length() > 255) {
@@ -85,6 +119,12 @@ public class SocialMediaController {
         return ResponseEntity.status(200).body(retrievedMessage);
     }
 
+    /*
+     * Updates message's text, identified by id
+     * @param messageId int id of the message
+     * @param messageText new text for the message
+     * @return ResponseEntity with updated message if successful
+     */
     @PatchMapping("/messages/{messageId}")
     public ResponseEntity updateMessageById(@PathVariable int messageId, @RequestBody String messageText){
         messageText = messageText.substring(18,messageText.length()-1);
@@ -98,6 +138,11 @@ public class SocialMediaController {
         return ResponseEntity.ok().body(1);
     }
 
+    /*
+     * Deletes message identified by id
+     * @param messageId int id of the message
+     * @return ResponseEntity with 1 in body if successful
+     */
     @DeleteMapping("/messages/{messageId}")
     public ResponseEntity deleteMessageById(@PathVariable int messageId){
         Message message = messageService.getMessageById(messageId);
